@@ -13,4 +13,6 @@ func SetupAccountRouter(app *fiber.App, store *db.Store) {
 
 	accountGroup := app.Group("/accounts")
 	accountGroup.Post("/", accountHandler.CreateAccount)
+	accountGroup.Get("/:id", accountHandler.GetAccount)
+	accountGroup.Get("/", accountHandler.ListAccounts)
 }

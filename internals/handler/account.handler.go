@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strconv"
+
 	db "github.com/Frank2006x/simple-bank/db/sqlc"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
@@ -41,4 +43,54 @@ func (h *AccountHandler) CreateAccount(c fiber.Ctx) error {
 		})
 	}
 	return c.Status(fiber.StatusCreated).JSON(account)
+}
+
+func (h *AccountHandler) GetAccount(c fiber.Ctx) error {
+	id,err:=strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid account ID",
+		})
+	}
+	if(id<=0){
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Account ID must be a positive integer",
+		})
+	}
+	account,err:=h.Queries.GetAccount(c.Context(), int64(id))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get account",
+		})
+	}
+
+	return c.JSON(account)
+}
+type ListAccountsRequest struct {
+	PageID int32 `query:"page_id" validate:"required,min=1"`
+	PageSize int32 `query:"page_size" validate:"required,min=5,max=10"`
+}
+
+func (h *AccountHandler) ListAccounts(c fiber.Ctx) error {
+	var req ListAccountsRequest
+	if err := c.Bind().Query(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request query",
+		})
+	}
+	if err := validate.Struct(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request data",
+		})
+	}
+	accounts, err := h.Queries.ListAccounts(c.Context(), db.ListAccountsParams{
+		Limit:   req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to list accounts",
+		})
+	}
+	return c.JSON(accounts)
 }
