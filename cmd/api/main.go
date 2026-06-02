@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	db "github.com/Frank2006x/simple-bank/db/sqlc"
 	"github.com/Frank2006x/simple-bank/internals"
+	"github.com/Frank2006x/simple-bank/util"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -13,15 +15,19 @@ var DB *pgxpool.Pool
 var Queries *db.Queries
 var Store *db.Store
 
-const (
-	dbSource = "postgresql://root:secret@localhost:5433/simple_bank?sslmode=disable"
-	serverAddress = "0.0.0.0:8080"
-)
+
 
 func main() {
+	config,err:=util.LoadConfig("./")
+	fmt.Println(config.DBSource)
+	fmt.Println(config.ServerAddress)
+	if err!=nil{
+		log.Fatal("cannot load config:", err)
+	}
+	
 	DB, err := pgxpool.New(
 		context.Background(),
-		dbSource,
+		config.DBSource,
 	)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
@@ -31,7 +37,7 @@ func main() {
 	Store = db.NewStore(DB)
 
 	Server := internals.NewServer(Store)
-	err = Server.Start(serverAddress)
+	err = Server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal("cannot start server:", err)
 	}
