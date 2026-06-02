@@ -7,21 +7,21 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type store struct {
+type Store struct {
 	*Queries
 	db *pgxpool.Pool
 }
 
 
-func NewStore(db *pgxpool.Pool) *store {
-	return &store{
+func NewStore(db *pgxpool.Pool) *Store {
+	return &Store{
 		Queries: New(db),
 		db: db,
 	}
 }
 
 
-func (s *store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (s *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := s.db.BeginTx(ctx, pgx.TxOptions{})
 
 	if err != nil {
@@ -47,7 +47,7 @@ type TransferTxResult struct {
 
 
 
-func (s *store) TransferTx(ctx context.Context, arg CreateTransferParams) (TransferTxResult, error) {
+func (s *Store) TransferTx(ctx context.Context, arg CreateTransferParams) (TransferTxResult, error) {
 	var result TransferTxResult
 
 	err := s.execTx(ctx, func(q *Queries) error {

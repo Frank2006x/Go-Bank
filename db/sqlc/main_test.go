@@ -11,7 +11,7 @@ import (
 
 var testQueries *Queries
 var testDB *pgxpool.Pool
-var testStore *store
+var testStore *Store
 
 func TestMain(m *testing.M) {
 	var err error
