@@ -2,8 +2,12 @@ package handler
 
 import (
 	db "github.com/Frank2006x/simple-bank/db/sqlc"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 )
+
+var validate = validator.New()
+
 
 type AccountHandler struct {
 	Queries *db.Queries
@@ -19,6 +23,11 @@ func (h *AccountHandler) CreateAccount(c fiber.Ctx) error {
 	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
+		})
+	}
+	if err := validate.Struct(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request data",
 		})
 	}
 	account,err:=h.Queries.CreateAccount(c.Context(), db.CreateAccountParams{
