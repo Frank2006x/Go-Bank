@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func SetupTransferRouter(app fiber.App, store *db.Store) {
+func SetupTransferRouter(app *fiber.App, store *db.Store) {
 	transferHandler := &handler.TransferHandler{
 		Store: store,
 	}

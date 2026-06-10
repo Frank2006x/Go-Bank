@@ -19,6 +19,7 @@ func NewServer(store *db.Store) *Server {
 	server.Router = fiber.New()
 	server.Router.Use(logger.New())
 	router.SetupAccountRouter(server.Router, server.Store)
+	router.SetupUserRouter(server.Router, server.Store)
 	return server
 }
 
