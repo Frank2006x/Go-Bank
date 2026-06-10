@@ -17,8 +17,12 @@ func LoadConfig(path string) (config Config, err error) {
 	v.SetConfigName("app")
 	v.SetConfigType("env")
 	v.AutomaticEnv()
-	_ = v.BindEnv("DB_SOURCE")
-	_ = v.BindEnv("SERVER_ADDRESS")
+	if err = v.BindEnv("DB_SOURCE"); err != nil {
+		return
+	}
+	if err = v.BindEnv("SERVER_ADDRESS"); err != nil {
+		return
+	}
 
 	err = v.ReadInConfig()
 	if err != nil {
