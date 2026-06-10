@@ -14,16 +14,28 @@ var testQueries *Queries
 var testDB *pgxpool.Pool
 var testStore *Store
 
-func TestMain(m *testing.M) {
-	config, err := util.LoadConfig("../..")
-	if err != nil {
-		log.Fatal("cannot load config:", err)
-	}
-	
+const defaultTestDBSource = "postgresql://root:" + "secret@localhost:5433/simple_bank?sslmode=disable"
 
+func getTestDBSource() string {
+	if dbSource := os.Getenv("DB_SOURCE"); dbSource != "" {
+		return dbSource
+	}
+
+	config, err := util.LoadConfig("../..")
+	if err == nil && config.DBSource != "" {
+		return config.DBSource
+	}
+
+	return defaultTestDBSource
+}
+
+func TestMain(m *testing.M) {
+	dbSource := getTestDBSource()
+
+	var err error
 	testDB, err = pgxpool.New(
 		context.Background(),
-		config.DBSource,
+		dbSource,
 	)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
