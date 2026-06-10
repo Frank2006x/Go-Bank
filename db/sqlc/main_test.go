@@ -14,8 +14,6 @@ var testQueries *Queries
 var testDB *pgxpool.Pool
 var testStore *Store
 
-const defaultTestDBSource = "postgresql://root:" + "secret@localhost:5433/simple_bank?sslmode=disable"
-
 func getTestDBSource() string {
 	if dbSource := os.Getenv("DB_SOURCE"); dbSource != "" {
 		return dbSource
@@ -26,7 +24,8 @@ func getTestDBSource() string {
 		return config.DBSource
 	}
 
-	return defaultTestDBSource
+	log.Fatal("cannot load test db source from DB_SOURCE or config")
+	return ""
 }
 
 func TestMain(m *testing.M) {

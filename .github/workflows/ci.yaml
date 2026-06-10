@@ -46,4 +46,8 @@ jobs:
       run: make migrateup
         
     - name: Test
-      run: make test
+      env:
+        POSTGRES_USER: root
+        POSTGRES_PASSWORD: secret
+        POSTGRES_DB: simple_bank
+      run: DB_SOURCE=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5433/${POSTGRES_DB}?sslmode=disable make test
