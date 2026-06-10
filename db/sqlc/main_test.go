@@ -14,16 +14,27 @@ var testQueries *Queries
 var testDB *pgxpool.Pool
 var testStore *Store
 
-func TestMain(m *testing.M) {
-	config, err := util.LoadConfig("../..")
-	if err != nil {
-		log.Fatal("cannot load config:", err)
+func getTestDBSource() string {
+	if dbSource := os.Getenv("DB_SOURCE"); dbSource != "" {
+		return dbSource
 	}
-	
 
+	config, err := util.LoadConfig("../..")
+	if err == nil && config.DBSource != "" {
+		return config.DBSource
+	}
+
+	log.Fatal("cannot load test db source from DB_SOURCE or config")
+	return ""
+}
+
+func TestMain(m *testing.M) {
+	dbSource := getTestDBSource()
+
+	var err error
 	testDB, err = pgxpool.New(
 		context.Background(),
-		config.DBSource,
+		dbSource,
 	)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
