@@ -2,12 +2,13 @@ package handler
 
 import (
 	db "github.com/Frank2006x/simple-bank/db/sqlc"
+	"github.com/Frank2006x/simple-bank/token"
 	"github.com/gofiber/fiber/v3"
 )
 
 type TransferHandler struct {
 	Store *db.Store
-
+	TokenMaker token.Maker
 }
 
 type CreateTransferRequest struct {

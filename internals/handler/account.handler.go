@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	db "github.com/Frank2006x/simple-bank/db/sqlc"
+	"github.com/Frank2006x/simple-bank/token"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 )
@@ -13,6 +14,7 @@ var validate = validator.New()
 
 type AccountHandler struct {
 	Queries *db.Queries
+	TokenMaker token.Maker
 }
 
 type CreateAccountRequest struct {

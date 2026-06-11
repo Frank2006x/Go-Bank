@@ -36,8 +36,11 @@ func main() {
 	Queries = db.New(DB)
 	Store = db.NewStore(DB)
 
-	Server := internals.NewServer(Store)
-	err = Server.Start(config.ServerAddress)
+	server ,err:= internals.NewServer(config, Store)
+	if err != nil {
+		log.Fatal("cannot create server:", err)
+	}
+	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal("cannot start server:", err)
 	}
