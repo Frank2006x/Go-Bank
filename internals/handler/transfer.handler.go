@@ -26,22 +26,31 @@ func (h *TransferHandler) CreateTransfer(c fiber.Ctx) error {
 			"error": "Invalid request body",
 		})
 	}
-	valid, err := h.validAccount(c, req.FromAccountID, req.Currency);
+	fromAccount,err := h.validAccount(c, req.FromAccountID, req.Currency);
+
+	payload := c.Locals("AuthorizationPayloadKey").(*token.Payload)
+
+	if payload.Username != fromAccount.Owner {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Unauthorized to access the from account",
+		})
+	}
+	
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to validate from account",
 		})
-	}	else if !valid {
+	}	else if fromAccount.ID == 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "From account does not exist or currency mismatch",
 		})
 	}
-	valid, err = h.validAccount(c, req.ToAccountID, req.Currency);
+	toAccount,err := h.validAccount(c, req.ToAccountID, req.Currency);
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to validate to account",
 		})
-	}	else if !valid {
+	}	else if toAccount.ID == 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "To account does not exist or currency mismatch",
 		})
@@ -62,14 +71,14 @@ func (h *TransferHandler) CreateTransfer(c fiber.Ctx) error {
 
 }
 
-func (h *TransferHandler) validAccount(c fiber.Ctx, accountID int64, currency string) (bool, error){
+func (h *TransferHandler) validAccount(c fiber.Ctx, accountID int64, currency string) (db.Account, error){
 
 	account,err:=h.Store.GetAccount(c.Context(), accountID)
 	if err != nil {
-		return false, err
+		return db.Account{}, err
 	}
 	if account.Currency != currency {
-		return false, nil
+		return db.Account{}, nil
 	}
-	return true, nil
+	return account, nil
 } 

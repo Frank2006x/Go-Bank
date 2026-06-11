@@ -20,8 +20,9 @@ RETURNING *;
 
 -- name: ListAccounts :many
 SELECT * FROM accounts
+ WHERE owner = $1
  ORDER BY id
- LIMIT $1 OFFSET $2;
+ LIMIT $2 OFFSET $3;
 
 -- name: UpdateAccountBalance :one
 UPDATE accounts

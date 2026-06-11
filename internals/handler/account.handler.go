@@ -49,6 +49,10 @@ func (h *AccountHandler) CreateAccount(c fiber.Ctx) error {
 
 func (h *AccountHandler) GetAccount(c fiber.Ctx) error {
 	id,err:=strconv.Atoi(c.Params("id"))
+
+	payload := c.Locals("AuthorizationPayloadKey").(*token.Payload)
+
+
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid account ID",
@@ -60,6 +64,12 @@ func (h *AccountHandler) GetAccount(c fiber.Ctx) error {
 		})
 	}
 	account,err:=h.Queries.GetAccount(c.Context(), int64(id))
+	if account.Owner != payload.Username {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "You are not authorized to access this account",
+		})
+	}
+
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to get account",
@@ -86,6 +96,7 @@ func (h *AccountHandler) ListAccounts(c fiber.Ctx) error {
 		})
 	}
 	accounts, err := h.Queries.ListAccounts(c.Context(), db.ListAccountsParams{
+		Owner: c.Locals("AuthorizationPayloadKey").(*token.Payload).Username,
 		Limit:   req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	})
