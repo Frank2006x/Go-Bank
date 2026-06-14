@@ -3,7 +3,6 @@ package router
 import (
 	db "github.com/Frank2006x/simple-bank/db/sqlc"
 	"github.com/Frank2006x/simple-bank/internals/handler"
-	"github.com/Frank2006x/simple-bank/internals/middleware"
 	"github.com/Frank2006x/simple-bank/token"
 	"github.com/Frank2006x/simple-bank/util"
 	"github.com/gofiber/fiber/v3"
@@ -18,5 +17,5 @@ func SetupUserRouter(router *fiber.App, store *db.Store, tokenMaker token.Maker,
 
 	userGroup := router.Group("/users")
 	userGroup.Post("/", userHandler.CreateUser)
-	userGroup.Post("/login", middleware.AuthMiddleware(tokenMaker), userHandler.LoginUser)
+	userGroup.Post("/login", userHandler.LoginUser)
 }
