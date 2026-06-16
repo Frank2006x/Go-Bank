@@ -14,6 +14,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Create app.env
+        run: |
+            echo "${{ secrets.APP_ENV }}" > app.env
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
